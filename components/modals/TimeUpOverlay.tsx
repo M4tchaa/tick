@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 
 interface TimeUpOverlayProps {
@@ -12,6 +12,7 @@ interface TimeUpOverlayProps {
 
 export function TimeUpOverlay({ advanceMode, onNext, onEnd, isLastScene }: TimeUpOverlayProps) {
   const [countdown, setCountdown] = useState(3);
+  const hasAdvanced = useRef(false);
 
   useEffect(() => {
     if (advanceMode !== "auto") return;
@@ -30,7 +31,8 @@ export function TimeUpOverlay({ advanceMode, onNext, onEnd, isLastScene }: TimeU
   }, [advanceMode]);
 
   useEffect(() => {
-    if (advanceMode === "auto" && countdown === 0) {
+    if (advanceMode === "auto" && countdown === 0 && !hasAdvanced.current) {
+      hasAdvanced.current = true;
       onNext();
     }
   }, [advanceMode, countdown, onNext]);

@@ -18,13 +18,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useScenes } from "@/hooks/useScenes";
 import { useCountdown } from "@/hooks/useCountdown";
 import { Maximize2, Minimize2, Trash2 } from "lucide-react";
 
 export default function Home() {
+  const [isMounted, setIsMounted] = useState(false);
   const {
     scenes,
     activeSceneIndex,
@@ -54,6 +54,10 @@ export default function Home() {
   }, [activeScene]);
 
   const countdown = useCountdown(handleTimeout);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   useEffect(() => {
     if (activeScene && countdown.status === "idle") {
@@ -109,33 +113,44 @@ export default function Home() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
 
-  const handleSceneSelect = (index: number) => {
-    setActiveSceneIndex(index);
-    setCompletedSceneIds(prev => {
-      const next = new Set(prev);
-      for (let i = index + 1; i < scenes.length; i++) {
-        next.delete(scenes[i].id);
-      }
-      return next;
-    });
-  };
+  const handleSceneSelect = useCallback(
+    (index: number) => {
+      setActiveSceneIndex(index);
+      setCompletedSceneIds(prev => {
+        const next = new Set(prev);
+        for (let i = index + 1; i < scenes.length; i++) {
+          next.delete(scenes[i].id);
+        }
+        return next;
+      });
+    },
+    [scenes, setActiveSceneIndex]
+  );
 
-  const handleNextFromTimeout = () => {
+  const handleNextFromTimeout = useCallback(() => {
     goToNext();
     setCompletedSceneIds(prev => {
       const next = new Set(prev);
       if (activeScene) next.delete(activeScene.id);
       return next;
     });
-  };
+  }, [activeScene, goToNext]);
 
-  const handleEndEvent = () => {
+  const handleEndEvent = useCallback(() => {
     countdown.reset(0);
     setCompletedSceneIds(new Set(scenes.map(s => s.id)));
-  };
+  }, [countdown, scenes]);
 
   const hasPrev = activeSceneIndex > 0;
   const hasNext = activeSceneIndex < scenes.length - 1;
+
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="font-mono text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -162,11 +177,14 @@ export default function Home() {
             onReorder={reorderScenes}
           />
           <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
-            <AlertDialogTrigger>
-              <Button variant="ghost" size="sm" className="text-destructive" aria-label="Reset all">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </AlertDialogTrigger>
+            <button
+              type="button"
+              onClick={() => setShowResetDialog(true)}
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-9 w-9 text-destructive"
+              aria-label="Reset all"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
             <AlertDialogContent>
               <AlertDialogHeader>
                 <AlertDialogTitle className="font-mono">Reset All?</AlertDialogTitle>
