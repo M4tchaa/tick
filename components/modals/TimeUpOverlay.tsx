@@ -6,16 +6,20 @@ import { Button } from "@/components/ui/button";
 interface TimeUpOverlayProps {
   advanceMode: "manual" | "auto";
   onNext: () => void;
+  onAutoNext: () => void;
   onEnd: () => void;
   isLastScene: boolean;
 }
 
-export function TimeUpOverlay({ advanceMode, onNext, onEnd, isLastScene }: TimeUpOverlayProps) {
+export function TimeUpOverlay({ advanceMode, onNext, onAutoNext, onEnd, isLastScene }: TimeUpOverlayProps) {
   const [countdown, setCountdown] = useState(3);
   const hasAdvanced = useRef(false);
 
   useEffect(() => {
     if (advanceMode !== "auto") return;
+
+    setCountdown(3);
+    hasAdvanced.current = false;
 
     const interval = setInterval(() => {
       setCountdown(prev => {
@@ -33,9 +37,9 @@ export function TimeUpOverlay({ advanceMode, onNext, onEnd, isLastScene }: TimeU
   useEffect(() => {
     if (advanceMode === "auto" && countdown === 0 && !hasAdvanced.current) {
       hasAdvanced.current = true;
-      onNext();
+      onAutoNext();
     }
-  }, [advanceMode, countdown, onNext]);
+  }, [advanceMode, countdown, onAutoNext]);
 
   return (
     <div className="fixed inset-0 bg-background/95 flex items-center justify-center z-50">

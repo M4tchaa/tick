@@ -10,6 +10,7 @@ interface UseCountdownReturn {
   pause: () => void;
   resume: () => void;
   reset: (durationSeconds: number) => void;
+  resetAndStart: (durationSeconds: number) => void;
   adjust: (deltaSeconds: number) => void;
   playBeep: () => void;
 }
@@ -118,6 +119,30 @@ export function useCountdown(onTimeout?: () => void): UseCountdownReturn {
     [clearTimer]
   );
 
+  const resetAndStart = useCallback(
+    (durationSeconds: number) => {
+      clearTimer();
+      setRemainingSeconds(durationSeconds);
+      setStatus("running");
+      startTimeRef.current = Date.now();
+      initialRemainingRef.current = durationSeconds;
+
+      intervalRef.current = setInterval(() => {
+        if (!startTimeRef.current) return;
+
+        const elapsed = Math.floor((Date.now() - startTimeRef.current) / 1000);
+        const newRemaining = Math.max(0, initialRemainingRef.current - elapsed);
+
+        setRemainingSeconds(newRemaining);
+
+        if (newRemaining === 0) {
+          handleTimeout();
+        }
+      }, 500);
+    },
+    [clearTimer, handleTimeout]
+  );
+
   const adjust = useCallback((deltaSeconds: number) => {
     setRemainingSeconds(prev => {
       const newValue = Math.max(0, prev + deltaSeconds);
@@ -141,6 +166,7 @@ export function useCountdown(onTimeout?: () => void): UseCountdownReturn {
     pause,
     resume,
     reset,
+    resetAndStart,
     adjust,
     playBeep,
   };

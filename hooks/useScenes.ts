@@ -23,14 +23,18 @@ export function useScenes(): UseScenesReturn {
 
   const addScene = useCallback(
     (scene: Omit<Scene, "id">) => {
-      const newScene: Scene = {
-        ...scene,
-        id: crypto.randomUUID(),
-      };
-      setState(prev => ({
-        ...prev,
-        scenes: [...prev.scenes, newScene],
-      }));
+      setState(prev => {
+        const firstSceneAdvanceMode = prev.scenes.length > 0 ? prev.scenes[0].advanceMode : scene.advanceMode;
+        const newScene: Scene = {
+          ...scene,
+          advanceMode: firstSceneAdvanceMode,
+          id: crypto.randomUUID(),
+        };
+        return {
+          ...prev,
+          scenes: [...prev.scenes, newScene],
+        };
+      });
     },
     [setState]
   );

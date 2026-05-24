@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { TimerDisplay } from "@/components/timer/TimerDisplay";
 import { SceneHeader } from "@/components/timer/SceneHeader";
 import { TimerControls } from "@/components/timer/TimerControls";
@@ -54,16 +54,34 @@ export default function Home() {
   }, [activeScene]);
 
   const countdown = useCountdown(handleTimeout);
+  const shouldAutoStartRef = useRef(false);
+  const prevSceneIndexRef = useRef(-1);
+  const countdownRef = useRef(countdown);
+
+  useEffect(() => {
+    countdownRef.current = countdown;
+  }, [countdown]);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
   useEffect(() => {
-    if (activeScene && countdown.status === "idle") {
-      countdown.reset(activeScene.durationSeconds);
+    if (!activeScene) return;
+
+    const sceneChanged = prevSceneIndexRef.current !== activeSceneIndex;
+    
+    if (sceneChanged) {
+      prevSceneIndexRef.current = activeSceneIndex;
+      
+      if (shouldAutoStartRef.current) {
+        shouldAutoStartRef.current = false;
+        countdownRef.current.resetAndStart(activeScene.durationSeconds);
+      } else {
+        countdownRef.current.reset(activeScene.durationSeconds);
+      }
     }
-  }, [activeSceneIndex, activeScene, countdown]);
+  }, [activeSceneIndex, activeScene]);
 
   useEffect(() => {
     const handleFullscreenChange = () => {
@@ -134,6 +152,16 @@ export default function Home() {
       if (activeScene) next.delete(activeScene.id);
       return next;
     });
+  }, [activeScene, goToNext]);
+
+  const handleNextAutoAdvance = useCallback(() => {
+    setCompletedSceneIds(prev => {
+      const next = new Set(prev);
+      if (activeScene) next.delete(activeScene.id);
+      return next;
+    });
+    shouldAutoStartRef.current = true;
+    goToNext();
   }, [activeScene, goToNext]);
 
   const handleEndEvent = useCallback(() => {
@@ -266,6 +294,7 @@ export default function Home() {
         <TimeUpOverlay
           advanceMode={activeScene.advanceMode}
           onNext={handleNextFromTimeout}
+          onAutoNext={handleNextAutoAdvance}
           onEnd={handleEndEvent}
           isLastScene={!hasNext}
         />

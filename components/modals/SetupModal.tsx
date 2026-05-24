@@ -30,6 +30,8 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
   const [duration, setDuration] = useState("");
   const [advanceMode, setAdvanceMode] = useState<"manual" | "auto" | "">("");
 
+  const isFirstScene = scenes.length === 0;
+
   const resetForm = () => {
     setEditingId(null);
     setName("");
@@ -38,7 +40,8 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
   };
 
   const handleSubmit = () => {
-    if (!name || !duration || !advanceMode) return;
+    if (!name || !duration) return;
+    if (isFirstScene && !advanceMode) return;
 
     const seconds = parseMinutesSeconds(duration);
     if (seconds <= 0) return;
@@ -47,13 +50,12 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
       onUpdate(editingId, {
         name,
         durationSeconds: seconds,
-        advanceMode: advanceMode as "manual" | "auto",
       });
     } else {
       onAdd({
         name,
         durationSeconds: seconds,
-        advanceMode: advanceMode as "manual" | "auto",
+        advanceMode: isFirstScene ? (advanceMode as "manual" | "auto") : scenes[0].advanceMode,
       });
     }
 
@@ -75,7 +77,7 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
     onReorder(newOrder);
   };
 
-  const isFormValid = name.trim() && duration.trim() && advanceMode;
+  const isFormValid = isFirstScene ? (name.trim() && duration.trim() && advanceMode) : (name.trim() && duration.trim());
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -120,29 +122,40 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
             />
           </div>
 
-          <div className="grid gap-2">
-            <Label className="font-mono text-sm">Advance Mode</Label>
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                variant={advanceMode === "manual" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setAdvanceMode("manual")}
-                className="flex-1 font-mono text-sm"
-              >
-                Manual
-              </Button>
-              <Button
-                type="button"
-                variant={advanceMode === "auto" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setAdvanceMode("auto")}
-                className="flex-1 font-mono text-sm"
-              >
-                Auto
-              </Button>
+          {isFirstScene && (
+            <div className="grid gap-2">
+              <Label className="font-mono text-sm">Advance Mode</Label>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant={advanceMode === "manual" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setAdvanceMode("manual")}
+                  className="flex-1 font-mono text-sm"
+                >
+                  Manual
+                </Button>
+                <Button
+                  type="button"
+                  variant={advanceMode === "auto" ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setAdvanceMode("auto")}
+                  className="flex-1 font-mono text-sm"
+                >
+                  Auto
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
+
+          {!isFirstScene && (
+            <div className="grid gap-2">
+              <Label className="font-mono text-sm">Advance Mode</Label>
+              <p className="text-sm text-muted-foreground font-mono">
+                {scenes[0].advanceMode === "auto" ? "Auto" : "Manual"} (set by first scene)
+              </p>
+            </div>
+          )}
 
           <Button
             onClick={handleSubmit}
