@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Scene } from "@/lib/types";
-import { parseMinutesSeconds, formatTime } from "@/lib/utils";
+import { parseTimeInput, formatTimeInput, secondsToTimeInputDigits } from "@/lib/utils";
 import { Settings, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 
 interface SetupModalProps {
@@ -21,16 +21,31 @@ interface SetupModalProps {
   onUpdate: (id: string, updates: Partial<Scene>) => void;
   onDelete: (id: string) => void;
   onReorder: (newOrder: Scene[]) => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: SetupModalProps) {
-  const [open, setOpen] = useState(false);
+export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open, onOpenChange }: SetupModalProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState("");
   const [advanceMode, setAdvanceMode] = useState<"manual" | "auto" | "">("");
+  const durationInputRef = useRef<HTMLInputElement>(null);
 
   const isFirstScene = scenes.length === 0;
+
+  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value.replace(/\D/g, "").slice(0, 6);
+    setDuration(newValue);
+    
+    // Force cursor to end
+    requestAnimationFrame(() => {
+      if (durationInputRef.current) {
+        const len = durationInputRef.current.value.length;
+        durationInputRef.current.setSelectionRange(len, len);
+      }
+    });
+  };
 
   const resetForm = () => {
     setEditingId(null);
@@ -43,7 +58,8 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
     if (!name || !duration) return;
     if (isFirstScene && !advanceMode) return;
 
-    const seconds = parseMinutesSeconds(duration);
+    const formatted = formatTimeInput(duration);
+    const seconds = parseTimeInput(formatted);
     if (seconds <= 0) return;
 
     if (editingId) {
@@ -65,7 +81,7 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
   const handleEdit = (scene: Scene) => {
     setEditingId(scene.id);
     setName(scene.name);
-    setDuration(formatTime(scene.durationSeconds).slice(0, -3)); // Remove hours, keep mm:ss
+    setDuration(secondsToTimeInputDigits(scene.durationSeconds));
     setAdvanceMode(scene.advanceMode);
   };
 
@@ -80,10 +96,10 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
   const isFormValid = isFirstScene ? (name.trim() && duration.trim() && advanceMode) : (name.trim() && duration.trim());
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => onOpenChange(true)}
         className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2"
         aria-label="Open setup"
       >
@@ -111,13 +127,14 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder }: Set
 
           <div className="grid gap-2">
             <Label htmlFor="scene-duration" className="font-mono text-sm">
-              Duration (mm:ss)
+              Duration
             </Label>
             <Input
               id="scene-duration"
-              value={duration}
-              onChange={e => setDuration(e.target.value)}
-              placeholder="10:00"
+              ref={durationInputRef}
+              value={formatTimeInput(duration)}
+              onChange={handleDurationChange}
+              placeholder="00:00:00"
               className="font-mono"
             />
           </div>

@@ -42,6 +42,7 @@ export default function Home() {
   const [completedSceneIds, setCompletedSceneIds] = useState<Set<string>>(new Set());
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
+  const [setupModalOpen, setSetupModalOpen] = useState(false);
 
   const handleTimeout = useCallback(() => {
     if (activeScene) {
@@ -55,7 +56,7 @@ export default function Home() {
 
   const countdown = useCountdown(handleTimeout);
   const shouldAutoStartRef = useRef(false);
-  const prevSceneIndexRef = useRef(-1);
+  const prevSceneIdRef = useRef<string | null>(null);
   const countdownRef = useRef(countdown);
 
   useEffect(() => {
@@ -67,12 +68,18 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
+    if (scenes.length === 0) {
+      setSetupModalOpen(false);
+    }
+  }, [scenes.length]);
+
+  useEffect(() => {
     if (!activeScene) return;
 
-    const sceneChanged = prevSceneIndexRef.current !== activeSceneIndex;
+    const sceneChanged = prevSceneIdRef.current !== activeScene.id;
     
     if (sceneChanged) {
-      prevSceneIndexRef.current = activeSceneIndex;
+      prevSceneIdRef.current = activeScene.id;
       
       if (shouldAutoStartRef.current) {
         shouldAutoStartRef.current = false;
@@ -198,6 +205,8 @@ export default function Home() {
             )}
           </Button>
           <SetupModal
+            open={setupModalOpen}
+            onOpenChange={setSetupModalOpen}
             scenes={scenes}
             onAdd={addScene}
             onUpdate={updateScene}
@@ -222,16 +231,17 @@ export default function Home() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel className="font-mono">Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => {
-                    resetAll();
-                    setCompletedSceneIds(new Set());
-                    countdown.reset(0);
-                  }}
-                  className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Reset All
-                </AlertDialogAction>
+          <AlertDialogAction
+            onClick={() => {
+              setSetupModalOpen(false);
+              resetAll();
+              setCompletedSceneIds(new Set());
+              countdown.reset(0);
+            }}
+            className="font-mono bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            Reset All
+          </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
