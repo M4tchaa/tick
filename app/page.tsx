@@ -5,6 +5,7 @@ import { TimerDisplay } from "@/components/timer/TimerDisplay";
 import { SceneHeader } from "@/components/timer/SceneHeader";
 import { TimerControls } from "@/components/timer/TimerControls";
 import { SceneList } from "@/components/timer/SceneList";
+import { LiveCue } from "@/components/timer/LiveCue";
 import { TimeUpOverlay } from "@/components/modals/TimeUpOverlay";
 import { SetupModal } from "@/components/modals/SetupModal";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ export default function Home() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [setupModalOpen, setSetupModalOpen] = useState(false);
+  const liveCueRef = useRef<{ trigger: () => void }>(null);
 
   const handleTimeout = useCallback(() => {
     if (activeScene) {
@@ -121,6 +123,12 @@ export default function Home() {
         case "f":
         case "F":
           toggleFullscreen();
+          break;
+        case "n":
+        case "N":
+        case "/":
+          e.preventDefault();
+          liveCueRef.current?.trigger();
           break;
         case "ArrowRight":
           if (countdown.status === "timeout") {
@@ -261,6 +269,7 @@ export default function Home() {
                 status={countdown.status}
                 accentColor={activeScene.color}
               />
+              <LiveCue ref={liveCueRef} sceneId={activeScene?.id ?? null} />
               {countdown.status === "timeout" && activeScene && (
                 <TimeUpOverlay
                   advanceMode={activeScene.advanceMode}
