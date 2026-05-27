@@ -87,12 +87,17 @@ export const LiveCue = forwardRef<LiveCueHandle, LiveCueProps>(
 
     if (!sceneId) return null;
 
+    const containerClass =
+      mode === "displaying"
+        ? "flex-1 flex flex-col items-center justify-center"
+        : "flex items-center justify-center py-2 px-4 min-h-[44px]";
+
     return (
-      <div className="flex items-center justify-center py-2 px-4 min-h-[44px]">
+      <div className={containerClass}>
         {mode === "idle" && (
           <button
-            className="opacity-15 hover:opacity-70 transition-opacity
-              border border-white/15 rounded-md px-3 py-1 text-xs font-mono text-foreground
+            className="opacity-30 hover:opacity-80 transition-opacity
+              border border-white/20 rounded-md px-3 py-1 text-xs font-mono text-foreground
               bg-transparent hover:bg-white/5 cursor-pointer"
             onClick={() => {
               setMode("input");
@@ -122,23 +127,43 @@ export const LiveCue = forwardRef<LiveCueHandle, LiveCueProps>(
         )}
 
         {mode === "displaying" && (
-          <div className="flex items-center gap-3">
-            <p className="font-mono text-3xl text-foreground/90 text-center min-w-0 max-w-lg">
-              {displayText}
-              {!isTypingComplete && (
-                <span className="inline-block w-0.5 h-8 bg-foreground ml-0.5 align-middle animate-blink-cursor">
-                  &nbsp;
-                </span>
-              )}
-            </p>
-            <button
-              className="opacity-40 hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
-              onClick={handleDelete}
-              aria-label="Delete cue"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
+          <>
+            <div className="flex-1 flex items-center justify-center px-4">
+              <div className="flex items-center gap-3">
+                <div className="border-y border-white/20 py-3 px-6">
+                  <p className="font-mono text-3xl text-foreground/90 text-center min-w-0 max-w-lg">
+                    {displayText}
+                    {!isTypingComplete && (
+                      <span className="inline-block w-0.5 h-8 bg-foreground ml-0.5 align-middle animate-blink-cursor">
+                        &nbsp;
+                      </span>
+                    )}
+                  </p>
+                </div>
+                <button
+                  className="opacity-40 hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+                  onClick={handleDelete}
+                  aria-label="Delete cue"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+            <div className="py-2 px-4">
+              <button
+                className="opacity-30 hover:opacity-80 transition-opacity
+                  border border-white/20 rounded-md px-3 py-1 text-xs font-mono text-foreground
+                  bg-transparent hover:bg-white/5 cursor-pointer"
+                onClick={() => {
+                  setMode("input");
+                  setTimeout(() => inputRef.current?.focus(), 0);
+                }}
+                aria-label="Send cue"
+              >
+                Send Cue
+              </button>
+            </div>
+          </>
         )}
       </div>
     );
