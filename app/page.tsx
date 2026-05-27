@@ -299,7 +299,7 @@ export default function Home() {
         )}
       </main>
 
-      <footer className="border-t border-border p-4">
+      <footer className="border-t border-border p-2">
         <SceneList
           scenes={scenes}
           activeIndex={activeSceneIndex}

@@ -22,7 +22,7 @@ export function SceneList({ scenes, activeIndex, completedSceneIds, onSelect }: 
   }
 
   return (
-    <ScrollArea className="h-48 w-full">
+    <ScrollArea className="h-32 w-full">
       <div className="space-y-1 py-2">
         {scenes.map((scene, index) => {
           const isActive = index === activeIndex;
