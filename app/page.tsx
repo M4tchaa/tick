@@ -269,7 +269,6 @@ export default function Home() {
                 status={countdown.status}
                 accentColor={activeScene.color}
               />
-              <LiveCue ref={liveCueRef} sceneId={activeScene?.id ?? null} />
               {countdown.status === "timeout" && activeScene && (
                 <TimeUpOverlay
                   advanceMode={activeScene.advanceMode}
@@ -280,6 +279,7 @@ export default function Home() {
                 />
               )}
             </div>
+            <LiveCue ref={liveCueRef} sceneId={activeScene?.id ?? null} />
             {!isFullscreen && (
               <>
                 <TimerControls

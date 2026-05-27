@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useImperativeHandle, forwardRef } from "react";
+import { X } from "lucide-react";
 
 interface LiveCueHandle {
   trigger: () => void;
@@ -68,6 +69,13 @@ export const LiveCue = forwardRef<LiveCueHandle, LiveCueProps>(
       setInputValue("");
     };
 
+    const handleDelete = () => {
+      setMode("idle");
+      setCueText("");
+      setDisplayText("");
+      setIsTypingComplete(false);
+    };
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === "Escape") {
         handleCancel();
@@ -80,12 +88,12 @@ export const LiveCue = forwardRef<LiveCueHandle, LiveCueProps>(
     if (!sceneId) return null;
 
     return (
-      <>
+      <div className="flex items-center justify-center py-2 px-4 min-h-[44px]">
         {mode === "idle" && (
           <button
-            className="absolute bottom-4 right-4 opacity-20 hover:opacity-80 transition-opacity
-              border border-white/20 rounded-md px-3 py-1.5 text-xs font-mono text-foreground
-              bg-transparent hover:bg-white/5 cursor-pointer z-10"
+            className="opacity-15 hover:opacity-70 transition-opacity
+              border border-white/15 rounded-md px-3 py-1 text-xs font-mono text-foreground
+              bg-transparent hover:bg-white/5 cursor-pointer"
             onClick={() => {
               setMode("input");
               setTimeout(() => inputRef.current?.focus(), 0);
@@ -97,58 +105,42 @@ export const LiveCue = forwardRef<LiveCueHandle, LiveCueProps>(
         )}
 
         {mode === "input" && (
-          <>
-            <div
-              className="absolute inset-0 bg-black/30 backdrop-blur-sm z-10"
-              onClick={handleCancel}
+          <div className="flex items-center gap-2">
+            <input
+              ref={inputRef}
+              className="bg-transparent border-b border-ring px-2 py-1 font-mono
+                text-foreground text-center w-72 max-w-[85vw] text-base
+                focus:outline-none focus:border-foreground transition-colors"
+              placeholder="Type cue..."
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              autoFocus
+              aria-label="Cue message input"
             />
-            <div className="absolute inset-0 flex items-center justify-center z-20">
-              <input
-                ref={inputRef}
-                className="bg-background/90 border border-ring rounded-lg px-5 py-3 font-mono
-                  text-foreground text-center w-80 max-w-[85vw] text-base
-                  focus:outline-none focus:ring-2 focus:ring-ring
-                  placeholder:text-muted-foreground/50 shadow-lg"
-                placeholder="Type cue message..."
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyDown={handleKeyDown}
-                autoFocus
-                aria-label="Cue message input"
-              />
-            </div>
-          </>
+          </div>
         )}
 
         {mode === "displaying" && (
-          <>
-            <div className="absolute bottom-20 left-0 right-0 flex justify-center z-0 px-4">
-              <p className="max-w-lg text-center font-mono text-lg text-foreground/90 leading-relaxed">
-                {displayText}
-                {!isTypingComplete && (
-                  <span className="inline-block w-0.5 h-5 bg-foreground ml-0.5 align-middle animate-pulse">
-                    &nbsp;
-                  </span>
-                )}
-              </p>
-            </div>
-
+          <div className="flex items-center gap-3">
+            <p className="font-mono text-3xl text-foreground/90 text-center min-w-0 max-w-lg">
+              {displayText}
+              {!isTypingComplete && (
+                <span className="inline-block w-0.5 h-8 bg-foreground ml-0.5 align-middle animate-blink-cursor">
+                  &nbsp;
+                </span>
+              )}
+            </p>
             <button
-              className="absolute bottom-4 right-4 opacity-20 hover:opacity-80 transition-opacity
-                border border-white/20 rounded-md px-3 py-1.5 text-xs font-mono text-foreground
-                bg-transparent hover:bg-white/5 cursor-pointer z-10"
-              onClick={() => {
-                setMode("input");
-                setInputValue("");
-                setTimeout(() => inputRef.current?.focus(), 0);
-              }}
-              aria-label="Send cue"
+              className="opacity-40 hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive shrink-0"
+              onClick={handleDelete}
+              aria-label="Delete cue"
             >
-              Send Cue
+              <X className="h-4 w-4" />
             </button>
-          </>
+          </div>
         )}
-      </>
+      </div>
     );
   }
 );
