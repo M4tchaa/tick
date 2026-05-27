@@ -11,7 +11,6 @@ interface UseCountdownReturn {
   resume: () => void;
   reset: (durationSeconds: number) => void;
   resetAndStart: (durationSeconds: number) => void;
-  adjust: (deltaSeconds: number) => void;
   playBeep: () => void;
 }
 
@@ -143,16 +142,6 @@ export function useCountdown(onTimeout?: () => void): UseCountdownReturn {
     [clearTimer, handleTimeout]
   );
 
-  const adjust = useCallback((deltaSeconds: number) => {
-    setRemainingSeconds(prev => {
-      const newValue = Math.max(0, prev + deltaSeconds);
-      if (newValue === 0 && status === "running") {
-        handleTimeout();
-      }
-      return newValue;
-    });
-  }, [handleTimeout, status]);
-
   useEffect(() => {
     return () => {
       clearTimer();
@@ -167,7 +156,6 @@ export function useCountdown(onTimeout?: () => void): UseCountdownReturn {
     resume,
     reset,
     resetAndStart,
-    adjust,
     playBeep,
   };
 }

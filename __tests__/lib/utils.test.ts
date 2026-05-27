@@ -1,4 +1,4 @@
-import { formatTime, clamp, parseMinutesSeconds } from "@/lib/utils";
+import { formatTime, clamp } from "@/lib/utils";
 
 describe("formatTime", () => {
   it("formats zero seconds", () => {
@@ -37,31 +37,5 @@ describe("clamp", () => {
 
   it("returns max when value is above", () => {
     expect(clamp(15, 0, 10)).toBe(10);
-  });
-});
-
-describe("parseMinutesSeconds", () => {
-  it("parses mm:ss format", () => {
-    expect(parseMinutesSeconds("05:30")).toBe(330);
-  });
-
-  it("parses m:s format", () => {
-    expect(parseMinutesSeconds("5:3")).toBe(303);
-  });
-
-  it("handles missing seconds", () => {
-    expect(parseMinutesSeconds("5:")).toBe(300);
-  });
-
-  it("handles missing minutes", () => {
-    expect(parseMinutesSeconds(":30")).toBe(30);
-  });
-
-  it("handles empty string", () => {
-    expect(parseMinutesSeconds("")).toBe(0);
-  });
-
-  it("handles invalid input", () => {
-    expect(parseMinutesSeconds("abc")).toBe(0);
   });
 });

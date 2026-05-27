@@ -16,10 +16,3 @@ export function formatTime(totalSeconds: number): string {
 export function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
 }
-
-export function parseMinutesSeconds(input: string): number {
-  const parts = input.split(":");
-  const m = parseInt(parts[0] || "0", 10) || 0;
-  const s = parseInt(parts[1] || "0", 10) || 0;
-  return m * 60 + s;
-}

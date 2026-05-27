@@ -31,39 +31,6 @@ describe("useCountdown", () => {
     expect(result.current.status).toBe("idle");
   });
 
-  it("adjusts time by positive delta", () => {
-    const { result } = renderHook(() => useCountdown());
-
-    act(() => {
-      result.current.reset(300);
-      result.current.adjust(60);
-    });
-
-    expect(result.current.remainingSeconds).toBe(360);
-  });
-
-  it("adjusts time by negative delta", () => {
-    const { result } = renderHook(() => useCountdown());
-
-    act(() => {
-      result.current.reset(300);
-      result.current.adjust(-120);
-    });
-
-    expect(result.current.remainingSeconds).toBe(180);
-  });
-
-  it("does not go below zero when adjusting", () => {
-    const { result } = renderHook(() => useCountdown());
-
-    act(() => {
-      result.current.reset(60);
-      result.current.adjust(-120);
-    });
-
-    expect(result.current.remainingSeconds).toBe(0);
-  });
-
   it("plays beep sound", () => {
     const { result } = renderHook(() => useCountdown());
 

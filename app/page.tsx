@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { TimerDisplay } from "@/components/timer/TimerDisplay";
 import { SceneHeader } from "@/components/timer/SceneHeader";
 import { TimerControls } from "@/components/timer/TimerControls";
-import { AdjustmentBar } from "@/components/timer/AdjustmentBar";
 import { SceneList } from "@/components/timer/SceneList";
 import { TimeUpOverlay } from "@/components/modals/TimeUpOverlay";
 import { SetupModal } from "@/components/modals/SetupModal";
@@ -273,10 +272,6 @@ export default function Home() {
                   onNext={goToNext}
                   hasPrev={hasPrev}
                   hasNext={hasNext}
-                />
-                <AdjustmentBar
-                  status={countdown.status}
-                  onAdjust={countdown.adjust}
                 />
               </>
             )}
