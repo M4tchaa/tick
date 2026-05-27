@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ interface SetupModalProps {
 }
 
 export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open, onOpenChange }: SetupModalProps) {
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [duration, setDuration] = useState(0);
@@ -38,6 +39,7 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open,
     setName("");
     setDuration(0);
     setAdvanceMode("");
+    requestAnimationFrame(() => nameInputRef.current?.focus());
   };
 
   const handleSubmit = () => {
@@ -100,6 +102,7 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open,
             </Label>
             <Input
               id="scene-name"
+              ref={nameInputRef}
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g., Opening, Q&A"
