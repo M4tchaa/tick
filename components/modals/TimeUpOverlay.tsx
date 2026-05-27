@@ -42,7 +42,7 @@ export function TimeUpOverlay({ advanceMode, onNext, onAutoNext, onEnd, isLastSc
   }, [advanceMode, countdown, onAutoNext]);
 
   return (
-    <div className="fixed inset-0 bg-background/95 flex items-center justify-center z-50">
+    <div className="absolute inset-0 bg-black/90 backdrop-blur-sm flex items-center justify-center z-10">
       <div className="text-center space-y-6">
         <h2 className="text-6xl font-bold text-danger animate-pulse-warning font-mono">
           TIME&apos;S UP

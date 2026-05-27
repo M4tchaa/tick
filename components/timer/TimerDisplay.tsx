@@ -27,7 +27,7 @@ export function TimerDisplay({ remainingSeconds, status, accentColor }: TimerDis
   }
 
   return (
-    <div className="flex flex-col items-center justify-center py-12">
+    <div className="flex flex-col items-center justify-center">
       <div
         className={`font-bold font-mono tracking-wider ${textColor} ${additionalClasses}`}
         style={{

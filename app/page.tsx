@@ -247,7 +247,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-4">
+      <main className="flex-1 flex flex-col p-4">
         {activeScene ? (
           <>
             <SceneHeader
@@ -255,11 +255,22 @@ export default function Home() {
               index={activeSceneIndex}
               total={scenes.length}
             />
-            <TimerDisplay
-              remainingSeconds={countdown.remainingSeconds}
-              status={countdown.status}
-              accentColor={activeScene.color}
-            />
+            <div className="flex-1 flex items-center justify-center relative">
+              <TimerDisplay
+                remainingSeconds={countdown.remainingSeconds}
+                status={countdown.status}
+                accentColor={activeScene.color}
+              />
+              {countdown.status === "timeout" && activeScene && (
+                <TimeUpOverlay
+                  advanceMode={activeScene.advanceMode}
+                  onNext={handleNextFromTimeout}
+                  onAutoNext={handleNextAutoAdvance}
+                  onEnd={handleEndEvent}
+                  isLastScene={!hasNext}
+                />
+              )}
+            </div>
             {!isFullscreen && (
               <>
                 <TimerControls
@@ -277,11 +288,13 @@ export default function Home() {
             )}
           </>
         ) : (
-          <div className="text-center space-y-4">
-            <h2 className="text-2xl font-bold font-mono">No Scenes Yet</h2>
-            <p className="text-muted-foreground font-mono">
-              Click Setup to add your first scene
-            </p>
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center space-y-4">
+              <h2 className="text-2xl font-bold font-mono">No Scenes Yet</h2>
+              <p className="text-muted-foreground font-mono">
+                Click Setup to add your first scene
+              </p>
+            </div>
           </div>
         )}
       </main>
@@ -294,16 +307,6 @@ export default function Home() {
           onSelect={handleSceneSelect}
         />
       </footer>
-
-      {countdown.status === "timeout" && activeScene && (
-        <TimeUpOverlay
-          advanceMode={activeScene.advanceMode}
-          onNext={handleNextFromTimeout}
-          onAutoNext={handleNextAutoAdvance}
-          onEnd={handleEndEvent}
-          isLastScene={!hasNext}
-        />
-      )}
     </div>
   );
 }
