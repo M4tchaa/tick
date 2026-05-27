@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Scene } from "@/lib/types";
-import { parseTimeInput, formatTimeInput, secondsToTimeInputDigits } from "@/lib/utils";
+import { DurationInput } from "@/components/DurationInput";
 import { Settings, Trash2, ArrowUp, ArrowDown } from "lucide-react";
 
 interface SetupModalProps {
@@ -28,49 +28,31 @@ interface SetupModalProps {
 export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open, onOpenChange }: SetupModalProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState("");
-  const [duration, setDuration] = useState("");
+  const [duration, setDuration] = useState(0);
   const [advanceMode, setAdvanceMode] = useState<"manual" | "auto" | "">("");
-  const durationInputRef = useRef<HTMLInputElement>(null);
 
   const isFirstScene = scenes.length === 0;
-
-  const handleDurationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value.replace(/\D/g, "").slice(0, 6);
-    setDuration(newValue);
-    
-    // Force cursor to end
-    requestAnimationFrame(() => {
-      if (durationInputRef.current) {
-        const len = durationInputRef.current.value.length;
-        durationInputRef.current.setSelectionRange(len, len);
-      }
-    });
-  };
 
   const resetForm = () => {
     setEditingId(null);
     setName("");
-    setDuration("");
+    setDuration(0);
     setAdvanceMode("");
   };
 
   const handleSubmit = () => {
-    if (!name || !duration) return;
+    if (!name || duration <= 0) return;
     if (isFirstScene && !advanceMode) return;
-
-    const formatted = formatTimeInput(duration);
-    const seconds = parseTimeInput(formatted);
-    if (seconds <= 0) return;
 
     if (editingId) {
       onUpdate(editingId, {
         name,
-        durationSeconds: seconds,
+        durationSeconds: duration,
       });
     } else {
       onAdd({
         name,
-        durationSeconds: seconds,
+        durationSeconds: duration,
         advanceMode: isFirstScene ? (advanceMode as "manual" | "auto") : scenes[0].advanceMode,
       });
     }
@@ -81,7 +63,7 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open,
   const handleEdit = (scene: Scene) => {
     setEditingId(scene.id);
     setName(scene.name);
-    setDuration(secondsToTimeInputDigits(scene.durationSeconds));
+    setDuration(scene.durationSeconds);
     setAdvanceMode(scene.advanceMode);
   };
 
@@ -93,7 +75,7 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open,
     onReorder(newOrder);
   };
 
-  const isFormValid = isFirstScene ? (name.trim() && duration.trim() && advanceMode) : (name.trim() && duration.trim());
+  const isFormValid = isFirstScene ? (name.trim() && duration > 0 && advanceMode) : (name.trim() && duration > 0);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -129,13 +111,10 @@ export function SetupModal({ scenes, onAdd, onUpdate, onDelete, onReorder, open,
             <Label htmlFor="scene-duration" className="font-mono text-sm">
               Duration
             </Label>
-            <Input
+            <DurationInput
               id="scene-duration"
-              ref={durationInputRef}
-              value={formatTimeInput(duration)}
-              onChange={handleDurationChange}
-              placeholder="00:00:00"
-              className="font-mono"
+              value={duration}
+              onChange={setDuration}
             />
           </div>
 
